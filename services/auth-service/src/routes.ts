@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as authController from "./authController";
-import { validateRequest } from "@shared/middleware";
+import { validateRequest } from "../../../shared/middleware";
 import { loginSchema, registerSchema } from "./validation";
 
 const router = Router();
@@ -11,3 +11,5 @@ router.post(
   authController.register
 );
 router.post("/login", validateRequest(loginSchema), authController.login);
+
+export default router;
