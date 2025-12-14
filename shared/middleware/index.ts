@@ -1,3 +1,4 @@
+import { logError, ServiceError } from "@shared/types";
 import { createErrorResponse } from "@shared/utils";
 import { Request, Response, NextFunction } from "express";
 
@@ -30,4 +31,25 @@ export function validateRequest(schema: any) {
     }
     next();
   };
+}
+
+export function errorHandler(
+  err: ServiceError,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  logError(err, {
+    method: req.method,
+    url: req.url,
+    body: req.body,
+    query: req.query,
+    params: req.params,
+  });
+
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal server error";
+  res.status(statusCode).json(createErrorResponse(message));
+
+  next();
 }
