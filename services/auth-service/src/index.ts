@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import authRoutes from "./routes";
+import { errorHandler } from "../../../shared/middleware";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,6 +15,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoutes);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Auth service is running on port ${PORT}`);
