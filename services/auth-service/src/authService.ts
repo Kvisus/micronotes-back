@@ -1,4 +1,4 @@
-import { AuthTokens } from "../../../shared/types";
+import { AuthTokens, JwtPayload, ServiceError } from "../../../shared/types";
 import prisma from "./database";
 import { createServiceError } from "../../../shared/utils";
 import bcrypt from "bcryptjs";
@@ -67,6 +67,84 @@ export class AuthService {
     return this.generateTokens(user.id, user.email);
   }
 
+  async refreshToken(refreshToken: string): Promise<AuthTokens> {
+    try {
+      const decoded = jwt.verify(
+        refreshToken,
+        this.jwtRefreshSecret
+      ) as JwtPayload;
+
+      const storedToken = await prisma.refreshToken.findUnique({
+        where: {
+          token: refreshToken,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      if (!storedToken || storedToken.expiresAt < new Date()) {
+        throw createServiceError(
+          "Invalid or expired refresh token",
+          401,
+          "INVALID_REFRESH_TOKEN"
+        );
+      }
+
+      const tokens = await this.generateTokens(
+        storedToken.user.id,
+        storedToken.user.email
+      );
+
+      await prisma.refreshToken.delete({
+        where: {
+          id: storedToken.id,
+        },
+      });
+
+      return tokens;
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        throw error;
+      }
+      throw createServiceError(
+        "Failed to refresh token",
+        401,
+        "TOKEN_REFRESH_FAILED"
+      );
+    }
+  }
+  async logout(refreshToken: string): Promise<void> {
+    await prisma.refreshToken.deleteMany({
+      where: {
+        token: refreshToken,
+      },
+    });
+  }
+
+  async validateToken(token: string): Promise<JwtPayload> {
+    try {
+      const decoded = jwt.verify(token, this.jwtSecret) as JwtPayload;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: decoded.userId,
+        },
+      });
+
+      if (!user) {
+        throw createServiceError("User not found", 404, "USER_NOT_FOUND");
+      }
+
+      return decoded;
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw createServiceError("Invalid token", 401);
+      }
+      throw createServiceError("Failed to validate token", 500, error);
+    }
+  }
+
   private async generateTokens(
     userId: string,
     email: string
@@ -103,5 +181,22 @@ export class AuthService {
       },
     });
     return { accessToken, refreshToken };
+  }
+
+  async getUserById(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, createdAt: true, updatedAt: true },
+    });
+    if (!user) {
+      throw createServiceError("User not found", 404);
+    }
+    return user;
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    await prisma.user.delete({
+      where: { id: userId },
+    });
   }
 }

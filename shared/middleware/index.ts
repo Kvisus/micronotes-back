@@ -2,6 +2,15 @@ import { logError, ServiceError } from "../types";
 import { createErrorResponse } from "../utils";
 import { Request, Response, NextFunction } from "express";
 
+//extend express request interface to include custom properties
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+
 export function asyncHandler(
   fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
 ) {
