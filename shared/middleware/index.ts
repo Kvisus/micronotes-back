@@ -73,9 +73,7 @@ export function authenticateToken(
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1]; //bearer
   if (!token) {
-    res
-      .status(401)
-      .json(createErrorResponse("Access token is required"));
+    res.status(401).json(createErrorResponse("Access token is required"));
     return;
   }
 
@@ -94,4 +92,13 @@ export function authenticateToken(
     req.user = decoded as JwtPayload; //attach decoded to request object
     next();
   });
+}
+
+export function corsOptions() {
+  return {
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    credentials: process.env.CORS_CREDENTIALS === "true",
+    methods: "GET,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+  };
 }

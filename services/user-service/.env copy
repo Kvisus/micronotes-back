@@ -1,0 +1,13 @@
+
+DATABASE_URL="postgresql://micronotes:micronotes123@localhost:5433/micronotes_auth"
+
+PORT=3001
+NODE_ENV="development"
+
+# JWT secrets, update with your own
+JWT_SECRET=""
+JWT_REFRESH_SECRET=""
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+BCRYPT_ROUNDS=10
