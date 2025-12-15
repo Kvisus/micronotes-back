@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as authController from "./authController";
-import { validateRequest } from "../../../shared/middleware";
+import { authenticateToken, validateRequest } from "../../../shared/middleware";
 import { loginSchema, refreshTokenSchema, registerSchema } from "./validation";
 
 const router = Router();
@@ -27,7 +27,7 @@ router.post(
 router.get("/validate", authController.validateToken);
 
 // Protected routes
-router.get("/profile", authController.getProfile);
-router.delete("/delete", authController.deleteAccount);
+router.get("/profile", authenticateToken, authController.getProfile);
+router.delete("/delete", authenticateToken, authController.deleteAccount);
 
 export default router;

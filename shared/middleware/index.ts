@@ -1,6 +1,7 @@
-import { logError, ServiceError } from "../types";
+import { JwtPayload, logError, ServiceError } from "../types";
 import { createErrorResponse } from "../utils";
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
 //extend express request interface to include custom properties
 declare global {
@@ -61,4 +62,32 @@ export function errorHandler(
   res.status(statusCode).json(createErrorResponse(message));
 
   next();
+}
+
+export function authenticateToken(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1]; //bearer
+  if (!token) {
+    return res
+      .status(401)
+      .json(createErrorResponse("Access token is required"));
+  }
+
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    logError(new Error("JWT_SECRET is not defined"));
+    return res.status(500).json(createErrorResponse("Internal server error"));
+  }
+
+  jwt.verify(token, jwtSecret, (err: any, decoded: any) => {
+    if (err) {
+      return res.status(403).json(createErrorResponse("Invalid token"));
+    }
+    req.user = decoded as JwtPayload; //attach decoded to request object
+    next();
+  });
 }
