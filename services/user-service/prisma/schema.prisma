@@ -19,7 +19,7 @@ model UserProfile {
   lastName    String?  @map("last_name")
   bio         String?
   avatarUrl   String?  @map("avatar_url")
-  preferences Json?    @default("{}") @map("preferences")
+  preferences Json?    @default("{}")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
