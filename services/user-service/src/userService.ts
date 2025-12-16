@@ -57,7 +57,30 @@ export class UserService {
         : null;
     }
     if (data.preferences !== undefined) {
-      sanitized.preferences = data.preferences ? data.preferences : null;
+      sanitized.preferences = data.preferences
+        ? this.sanitizePreferences(data.preferences)
+        : null;
+    }
+    return sanitized;
+  }
+
+  private sanitizePreferences(preferences: any): any {
+    if (!preferences || typeof preferences !== "object") {
+      return preferences;
+    }
+
+    const sanitized: any = {};
+    for (const key in preferences) {
+      if (preferences.hasOwnProperty(key)) {
+        const value = preferences[key];
+        if (typeof value === "string") {
+          sanitized[key] = sanitizeInput(value);
+        } else if (typeof value === "object" && value !== null) {
+          sanitized[key] = this.sanitizePreferences(value);
+        } else {
+          sanitized[key] = value;
+        }
+      }
     }
     return sanitized;
   }
