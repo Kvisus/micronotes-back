@@ -33,3 +33,7 @@ export function createSuccessResponse<T>(
 export function createErrorResponse(error: string): ApiResponse {
   return createApiResponse(false, undefined, undefined, error);
 }
+
+export function sanitizeInput(input: string): string {
+  return input.replace(/[<>]/g, "").replace(/[&]/g, "&amp;").trim();
+}
