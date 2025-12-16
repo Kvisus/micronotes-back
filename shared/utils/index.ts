@@ -35,5 +35,5 @@ export function createErrorResponse(error: string): ApiResponse {
 }
 
 export function sanitizeInput(input: string): string {
-  return input.replace(/[<>]/g, "").replace(/[&]/g, "&amp;").trim();
+  return input.replace(/[<>]/g, " ").replace(/[&]/g, "&amp;").trim();
 }

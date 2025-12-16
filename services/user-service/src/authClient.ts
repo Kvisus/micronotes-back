@@ -1,4 +1,4 @@
-import { createServiceError } from "@shared/utils";
+import { createServiceError } from "../../../shared/utils";
 import { JwtPayload, ServiceResponse } from "../../../shared/types";
 import axios from "axios";
 
