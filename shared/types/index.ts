@@ -54,3 +54,30 @@ export function logError(err: Error, context?: Record<string, any>) {
     timestamp: new Date().toISOString(),
   });
 }
+
+export interface UserProfile {
+  id: string;
+  userId: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  bio?: string | null;
+  avatarUrl?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  preferences?: any;
+}
+
+export interface UpdateProfileRequest {
+  firstName?: string | null;
+  lastName?: string | null;
+  bio?: string | null;
+  avatarUrl?: string | null;
+  preferences?: any;
+}
+
+export interface ServiceResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  statusCode?: number;
+}
