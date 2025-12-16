@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "Auth Service",
+      "path": "./services/auth-service"
+    },
+    {
+      "name": "User Service",
+      "path": "./services/user-service"
+    },
+    {
+      "name": "Shared",
+      "path": "./shared"
+    }
+  ],
+  "settings": {
+    "jest.jestCommandLine": "npm run test",
+    "jest.runMode": "on-demand"
+  }
+}
