@@ -9,6 +9,10 @@
       "path": "./services/user-service"
     },
     {
+      "name": "Notes Service",
+      "path": "./services/notes-service"
+    },
+    {
       "name": "Shared",
       "path": "./shared"
     }
