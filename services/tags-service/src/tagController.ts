@@ -3,6 +3,7 @@ import { TagService } from "./tagService";
 import { Request, Response } from "express";
 import { createSuccessResponse } from "../../../shared/utils";
 import { createErrorResponse } from "../../../shared/utils";
+import { UpdateTagRequest } from "../../../shared/types";
 
 const tagService = new TagService();
 
@@ -55,7 +56,7 @@ export const getTagById = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const tagId = req.params.id;
+  const tagId = req.params.tagId;
   const tag = await tagService.getTagById(tagId, userId);
   res
     .status(200)
@@ -85,3 +86,33 @@ export const validateTags = asyncHandler(
       );
   }
 );
+
+export const updateTag = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    res.status(401).json(createErrorResponse("Unauthorized"));
+    return;
+  }
+
+  const tagId = req.params.tagId;
+  const tag = await tagService.updateTag(
+    tagId,
+    userId,
+    req.body as UpdateTagRequest
+  );
+  res.status(200).json(createSuccessResponse(tag, "Tag updated successfully"));
+});
+
+export const deleteTag = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    res.status(401).json(createErrorResponse("Unauthorized"));
+    return;
+  }
+
+  const tagId = req.params.tagId;
+  await tagService.deleteTag(tagId, userId);
+  res.status(200).json(createSuccessResponse(null, "Tag deleted successfully"));
+});

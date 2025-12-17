@@ -1,7 +1,12 @@
 import { createServiceError, sanitizeInput } from "../../../shared/utils";
-import { CreateNoteRequest, Note } from "../../../shared/types";
+import {
+  CreateNoteRequest,
+  UpdateNoteRequest,
+  Note,
+} from "../../../shared/types";
 import prisma from "./database";
 import { TagServiceClient } from "./tagServiceClient";
+import { Prisma } from "@prisma/client";
 
 export class NotesService {
   private tagServiceClient: TagServiceClient;
@@ -17,24 +22,35 @@ export class NotesService {
     const sanitizedTitle = sanitizeInput(noteData.title);
     const sanitizedContent = sanitizeInput(noteData.content);
 
-    const note = await prisma.note.create({
-      data: {
-        userId,
-        title: sanitizedTitle,
-        content: sanitizedContent,
-      },
-      include: {
-        noteTags: true,
-      },
+    // Use transaction to ensure atomicity
+    const note = await prisma.$transaction(async (tx) => {
+      const createdNote = await tx.note.create({
+        data: {
+          userId,
+          title: sanitizedTitle,
+          content: sanitizedContent,
+        },
+        include: {
+          noteTags: true,
+        },
+      });
+
+      if (noteData.tagIds && noteData.tagIds.length > 0) {
+        if (authToken) {
+          await this.tagServiceClient.validateTags(noteData.tagIds, authToken);
+        }
+        await this.addTagsToNoteInTransaction(
+          tx,
+          createdNote.id,
+          noteData.tagIds
+        );
+      }
+
+      return createdNote;
     });
 
+    // Refetch the note with tags if they were added
     if (noteData.tagIds && noteData.tagIds.length > 0) {
-      if (authToken) {
-        await this.tagServiceClient.validateTags(noteData.tagIds, authToken);
-      }
-      await this.addTagsToNote(note.id, noteData.tagIds);
-
-      //refetch the note with tags
       return await this.getNoteById(note.id, userId);
     }
 
@@ -119,6 +135,86 @@ export class NotesService {
     await prisma.noteTag.createMany({
       data: noteTagData,
       skipDuplicates: true,
+    });
+  }
+
+  private async addTagsToNoteInTransaction(
+    tx: Prisma.TransactionClient,
+    noteId: string,
+    tagIds: string[]
+  ): Promise<void> {
+    const noteTagData = tagIds.map((tagId) => ({
+      noteId,
+      tagId,
+    }));
+
+    await tx.noteTag.createMany({
+      data: noteTagData,
+      skipDuplicates: true,
+    });
+  }
+
+  async updateNote(
+    noteId: string,
+    userId: string,
+    noteData: UpdateNoteRequest,
+    authToken?: string
+  ): Promise<Note> {
+    const existingNote = await this.getNoteById(noteId, userId);
+    if (!existingNote) {
+      throw createServiceError("Note not found", 404);
+    }
+    return await prisma.$transaction(async (tx) => {
+      const updateData: any = {};
+
+      if (noteData.title !== undefined) {
+        updateData.title = sanitizeInput(noteData.title);
+      }
+
+      if (noteData.content !== undefined) {
+        updateData.content = sanitizeInput(noteData.content);
+      }
+
+      const note = await tx.note.update({
+        where: { id: noteId },
+        data: updateData,
+        include: {
+          noteTags: true,
+        },
+      });
+
+      // Handle tag updates if provided
+      if (noteData.tagIds !== undefined) {
+        // Remove all existing tags
+        await tx.noteTag.deleteMany({
+          where: { noteId },
+        });
+
+        // Add new tags if provided
+        if (noteData.tagIds.length > 0) {
+          if (authToken) {
+            await this.tagServiceClient.validateTags(
+              noteData.tagIds,
+              authToken
+            );
+          }
+          await this.addTagsToNoteInTransaction(tx, noteId, noteData.tagIds);
+        }
+      }
+
+      // Refetch to get updated note with tags
+      return await this.getNoteById(noteId, userId);
+    });
+  }
+
+  async deleteNote(noteId: string, userId: string): Promise<void> {
+    const note = await this.getNoteById(noteId, userId);
+    if (!note) {
+      throw createServiceError("Note not found", 404);
+    }
+    await prisma.note.update({
+      where: { id: noteId },
+      data: { isDeleted: true },
     });
   }
 

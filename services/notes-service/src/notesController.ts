@@ -6,6 +6,7 @@ import {
 import { asyncHandler } from "../../../shared/middleware";
 import { NotesService } from "./notesService";
 import { Request, Response } from "express";
+import { UpdateNoteRequest } from "../../../shared/types";
 
 const notesService = new NotesService();
 
@@ -62,4 +63,45 @@ export const getNotes = asyncHandler(async (req: Request, res: Response) => {
   res
     .status(200)
     .json(createSuccessResponse(notes, "Notes retrieved successfully"));
+});
+
+export const updateNote = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    res.status(401).json(createErrorResponse("Unauthorized"));
+    return;
+  }
+
+  const authHeader = req.headers.authorization;
+  const authToken = authHeader && authHeader.split(" ")[1];
+
+  if (!authToken) {
+    res.status(401).json(createErrorResponse("Unauthorized"));
+    return;
+  }
+
+  const noteId = req.params.noteId;
+  const note = await notesService.updateNote(
+    noteId,
+    userId,
+    req.body as UpdateNoteRequest,
+    authToken
+  );
+  res
+    .status(200)
+    .json(createSuccessResponse(note, "Note updated successfully"));
+});
+
+export const deleteNote = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    res.status(401).json(createErrorResponse("Unauthorized"));
+    return;
+  }
+
+  const noteId = req.params.noteId;
+  await notesService.deleteNote(noteId, userId);
+  res.status(200).json(createSuccessResponse(null, "Note deleted successfully"));
 });

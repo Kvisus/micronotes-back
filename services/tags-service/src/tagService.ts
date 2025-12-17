@@ -3,7 +3,7 @@ import {
   isValidUUID,
   sanitizeInput,
 } from "../../../shared/utils";
-import { Tag, CreateTagRequest } from "../../../shared/types";
+import { Tag, CreateTagRequest, UpdateTagRequest } from "../../../shared/types";
 import prisma from "./database";
 
 export class TagService {
@@ -131,5 +131,69 @@ export class TagService {
     }
 
     return { validTags, invalidTags };
+  }
+
+  async updateTag(
+    tagId: string,
+    userId: string,
+    tagData: UpdateTagRequest
+  ): Promise<Tag> {
+    if (!isValidUUID(tagId)) {
+      throw createServiceError("Invalid tag ID", 400);
+    }
+
+    const existingTag = await this.getTagById(tagId, userId);
+
+    const updateData: any = {};
+
+    if (tagData.name !== undefined) {
+      updateData.name = sanitizeInput(tagData.name);
+    }
+
+    if (tagData.color !== undefined) {
+      if (tagData.color === null || tagData.color === "") {
+        updateData.color = null;
+      } else {
+        const sanitizedColor = sanitizeInput(tagData.color);
+        if (!this.isValidHexColor(sanitizedColor)) {
+          throw createServiceError(
+            "Invalid color format, use hex format (e.g.,#572115 or #f73)",
+            400
+          );
+        }
+        updateData.color = sanitizedColor;
+      }
+    }
+
+    try {
+      const tag = await prisma.tag.update({
+        where: { id: tagId },
+        data: updateData,
+      });
+      return tag as Tag;
+    } catch (error: any) {
+      if (error.code === "P2002") {
+        throw createServiceError("Tag name already exists", 409);
+      }
+      if (error.code === "P2025") {
+        throw createServiceError("Tag not found", 404);
+      }
+      throw createServiceError("Failed to update tag", 500);
+    }
+  }
+
+  async deleteTag(tagId: string, userId: string): Promise<void> {
+    if (!isValidUUID(tagId)) {
+      throw createServiceError("Invalid tag ID", 400);
+    }
+
+    const tag = await this.getTagById(tagId, userId);
+    if (!tag) {
+      throw createServiceError("Tag not found", 404);
+    }
+
+    await prisma.tag.delete({
+      where: { id: tagId },
+    });
   }
 }
