@@ -1,4 +1,4 @@
-import { createErrorResponse, createSuccessResponse } from "@shared/utils";
+import { createErrorResponse, createSuccessResponse } from "../../../shared/utils";
 import { asyncHandler } from "../../../shared/middleware";
 import { NotesService } from "./notesService";
 import { Request, Response } from "express";

@@ -49,6 +49,7 @@ const server = app.listen(PORT, () => {
   console.log("--------------------------------");
   console.log(`| /auth | http://localhost:${PORT}//api/auth/* |`);
   console.log(`| /user | http://localhost:${PORT}//api/user/* |`);
+  console.log(`| /notes | http://localhost:${PORT}//api/notes/* |`);
   console.log("--------------------------------");
 });
 
