@@ -1,9 +1,10 @@
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import proxyRoutes from "./routes/proxy";
 import { gatewayAuth } from "./midlleware/auth";
+import { createErrorResponse } from "../../shared/utils";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -27,6 +28,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(gatewayAuth);
 
 app.use(proxyRoutes);
+
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  console.log("Unhandled error:", error);
+
+  if (!res.headersSent) {
+    res
+      .status(error.statusCode || 500)
+      .json(createErrorResponse(error.message || "Internal server error"));
+  }
+});
 
 const server = app.listen(PORT, () => {
   console.log(`API Gateway is running on port ${PORT}`);

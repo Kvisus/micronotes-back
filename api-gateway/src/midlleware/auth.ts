@@ -65,7 +65,7 @@ export function gatewayAuth(
     //add user info to headers for downstream services
     req.headers["x-user-id"] = decoded.userId;
     req.headers["x-user-email"] = decoded.email;
-    
+
     next();
   });
 }
