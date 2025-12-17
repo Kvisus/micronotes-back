@@ -102,3 +102,7 @@ export function corsOptions() {
     allowedHeaders: "Content-Type,Authorization",
   };
 }
+
+export function healthCheck(req: Request, res: Response) {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+}

@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import userRoutes from "./routes"
-import { corsOptions, errorHandler } from "../../../shared/middleware";
+import { corsOptions, errorHandler, healthCheck } from "../../../shared/middleware";
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -15,6 +15,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/user", userRoutes);
+app.get("/health", healthCheck);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
