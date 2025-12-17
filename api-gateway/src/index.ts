@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import proxyRoutes from "./routes/proxy";
-import { gatewayAuth } from "./midlleware/auth";
+import { gatewayAuth } from "./middleware/auth";
 import { createErrorResponse } from "../../shared/utils";
 
 const app = express();
