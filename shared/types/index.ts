@@ -81,3 +81,33 @@ export interface ServiceResponse<T = any> {
   error?: string;
   statusCode?: number;
 }
+
+export interface CreateNoteRequest {
+  title: string;
+  content: string;
+  tagIds?: string[];
+}
+
+export interface UpdateNoteRequest {
+  title?: string;
+  content?: string;
+  tagIds?: string[];
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  tags?: Tag[];
+}
+
+export interface Tag {
+  id: string;
+  label: string;
+  color?: string;
+  userId: string;
+  updatedAt: Date;
+}
