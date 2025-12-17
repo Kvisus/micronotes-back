@@ -25,6 +25,13 @@ export const servicesConfig: ServicesConfig = {
     timeout: 5000,
     retries: 3,
   },
+  notes: {
+    name: "Notes Service",
+    url: process.env.NOTES_SERVICE_URL || "http://localhost:3003",
+    healthPath: "/health",
+    timeout: 5000,
+    retries: 3,
+  },
 };
 
 export const getServiceConfig = (

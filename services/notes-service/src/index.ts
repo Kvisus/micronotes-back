@@ -2,7 +2,11 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { corsOptions, errorHandler, healthCheck } from "../../../shared/middleware";
+import {
+  corsOptions,
+  errorHandler,
+  healthCheck,
+} from "../../../shared/middleware";
 import notesRoutes from "./routes";
 
 const app = express();

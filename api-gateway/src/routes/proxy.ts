@@ -3,7 +3,6 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import { servicesConfig } from "../config/services";
 import dotenv from "dotenv";
 
-
 const router = Router();
 
 function createServiceProxy(
@@ -75,6 +74,13 @@ router.use(
   "/api/user",
   createServiceProxy(servicesConfig.user.url, {
     "^/api/user": "/user", //rewrite api/user to user
+  })
+);
+
+router.use(
+  "/api/notes",
+  createServiceProxy(servicesConfig.notes.url, {
+    "^/api/notes": "/notes", //rewrite api/notes to notes
   })
 );
 
