@@ -2,9 +2,11 @@ import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import swaggerUi from "swagger-ui-express";
 import proxyRoutes from "./routes/proxy";
 import { gatewayAuth } from "./middleware/auth";
 import { createErrorResponse } from "../../shared/utils";
+import { swaggerSpec } from "./config/swagger.config";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -25,6 +27,16 @@ app.use(helmet({ crossOriginEmbedderPolicy: false }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: ".swagger-ui .topbar { display: none }",
+  customSiteTitle: "Micronotes API Documentation",
+}));
+
+app.get("/api-docs.json", (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 app.use(gatewayAuth);
 
 app.use(proxyRoutes);
@@ -43,14 +55,15 @@ const server = app.listen(PORT, () => {
   console.log(`API Gateway is running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`Swagger UI: http://localhost:${PORT}/api-docs`);
   console.log("Possible endpoints:");
   console.log("--------------------------------");
   console.log("| Path | URL |");
   console.log("--------------------------------");
-  console.log(`| /auth | http://localhost:${PORT}//api/auth/* |`);
-  console.log(`| /user | http://localhost:${PORT}//api/user/* |`);
-  console.log(`| /notes | http://localhost:${PORT}//api/notes/* |`);
-  console.log(`| /tags | http://localhost:${PORT}//api/tags/* |`);
+  console.log(`| /auth | http://localhost:${PORT}/api/auth/* |`);
+  console.log(`| /user | http://localhost:${PORT}/api/user/* |`);
+  console.log(`| /notes | http://localhost:${PORT}/api/notes/* |`);
+  console.log(`| /tags | http://localhost:${PORT}/api/tags/* |`);
   console.log("--------------------------------");
 });
 

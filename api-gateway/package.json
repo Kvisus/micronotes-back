@@ -19,7 +19,9 @@
     "helmet": "^8.1.0",
     "http-proxy-middleware": "^2.0.6",
     "joi": "^18.0.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
@@ -28,6 +30,8 @@
     "@types/express": "^5.0.6",
     "@types/joi": "^17.2.2",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
     "nodemon": "^3.1.11"
   }
 }

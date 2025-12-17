@@ -18,6 +18,8 @@ const publicRoutes = [
   "/api/auth/register",
   "/api/auth/login",
   "/api/auth/refresh",
+  "/api-docs",
+  "/api-docs.json",
   "/",
 ];
 
