@@ -50,6 +50,7 @@ const server = app.listen(PORT, () => {
   console.log(`| /auth | http://localhost:${PORT}//api/auth/* |`);
   console.log(`| /user | http://localhost:${PORT}//api/user/* |`);
   console.log(`| /notes | http://localhost:${PORT}//api/notes/* |`);
+  console.log(`| /tags | http://localhost:${PORT}//api/tags/* |`);
   console.log("--------------------------------");
 });
 

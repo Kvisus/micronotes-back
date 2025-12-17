@@ -106,8 +106,13 @@ export interface Note {
 
 export interface Tag {
   id: string;
-  label: string;
+  name: string;
   color?: string;
   userId: string;
   updatedAt: Date;
+}
+
+export interface CreateTagRequest {
+  name: string;
+  color?: string;
 }
